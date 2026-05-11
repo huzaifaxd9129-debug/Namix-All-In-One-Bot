@@ -33,7 +33,9 @@ require("./systems/automod")(client);
 require("./systems/invites")(client);
 
 // ================= READY EVENT =================
-client.once("ready", () => {
+client.once("clientReady", () => {
+  console.log("Bot is ready");
+});
 
   console.log(`
 ✅ BOT ONLINE
