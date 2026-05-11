@@ -7,8 +7,9 @@ module.exports = {
   statusMessages: [
     "Moderating Premium Servers",
     "Ensuring Uptime Stability",
-    "Made By @Huztro",
-    "Type !help To Get Started"
+    "Made By Huztro",
+    "Latence: 174",
+    "Exculting System Diagnostics"
   ],
 
   statusType: "PLAYING", // PLAYING | WATCHING | LISTENING
