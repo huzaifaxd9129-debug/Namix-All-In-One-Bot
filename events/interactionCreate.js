@@ -1,14 +1,16 @@
+const { ChannelType, PermissionsBitField } = require("discord.js");
+
 module.exports = (client) => {
 
   client.on("interactionCreate", async (interaction) => {
     try {
 
-      // ================= BUTTON HANDLING =================
+      // ================= BUTTONS =================
       if (interaction.isButton()) {
 
         const { customId } = interaction;
 
-        // ================= TICKET SYSTEM BUTTONS =================
+        // ================= 🎫 CREATE TICKET =================
         if (customId === "create_ticket") {
 
           const existing = interaction.guild.channels.cache.find(
@@ -24,15 +26,19 @@ module.exports = (client) => {
 
           const channel = await interaction.guild.channels.create({
             name: `ticket-${interaction.user.id}`,
-            type: 0, // text channel
+            type: ChannelType.GuildText,
             permissionOverwrites: [
               {
                 id: interaction.guild.id,
-                deny: ["ViewChannel"]
+                deny: [PermissionsBitField.Flags.ViewChannel]
               },
               {
                 id: interaction.user.id,
-                allow: ["ViewChannel", "SendMessages", "ReadMessageHistory"]
+                allow: [
+                  PermissionsBitField.Flags.ViewChannel,
+                  PermissionsBitField.Flags.SendMessages,
+                  PermissionsBitField.Flags.ReadMessageHistory
+                ]
               }
             ]
           });
@@ -43,8 +49,14 @@ module.exports = (client) => {
           });
         }
 
-        // ================= CLOSE TICKET =================
+        // ================= 🔒 CLOSE TICKET =================
         if (customId === "close_ticket") {
+
+          if (!interaction.channel.name.startsWith("ticket-"))
+            return interaction.reply({
+              content: "❌ This is not a ticket channel.",
+              ephemeral: true
+            });
 
           await interaction.reply({
             content: "🔒 Closing ticket in 5 seconds...",
@@ -56,16 +68,22 @@ module.exports = (client) => {
           }, 5000);
         }
 
-        // ================= CLAIM TICKET =================
+        // ================= 👤 CLAIM TICKET =================
         if (customId === "claim_ticket") {
 
+          if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+            return interaction.reply({
+              content: "❌ Only staff can claim tickets.",
+              ephemeral: true
+            });
+          }
+
           return interaction.reply({
-            content: `👤 Ticket claimed by ${interaction.user}`,
-            allowedMentions: { repliedUser: false }
+            content: `👤 Ticket claimed by ${interaction.user}`
           });
         }
 
-        // ================= GIVEAWAY JOIN =================
+        // ================= 🎉 GIVEAWAY JOIN =================
         if (customId === "giveaway_join") {
 
           return interaction.reply({
@@ -74,24 +92,62 @@ module.exports = (client) => {
           });
         }
 
-        // ================= STAFF APPLY BUTTON =================
+        // ================= 🧑‍💼 STAFF APPLY BUTTON =================
         if (customId === "apply_staff") {
 
-          return interaction.reply({
-            content: "🧑‍💼 Staff application opened (system coming soon)",
-            ephemeral: true
-          });
+          // SIMPLE APPLICATION FLOW (DM STYLE)
+          try {
+            await interaction.user.send(`
+🧑‍💼 STAFF APPLICATION
+
+Answer these questions:
+
+1️⃣ Why do you want staff?
+2️⃣ Your experience?
+3️⃣ How active are you?
+4️⃣ Your age?
+            `);
+
+            return interaction.reply({
+              content: "📩 Check your DMs to complete application!",
+              ephemeral: true
+            });
+
+          } catch (err) {
+            return interaction.reply({
+              content: "❌ I couldn't DM you. Enable DMs first.",
+              ephemeral: true
+            });
+          }
         }
       }
 
-      // ================= MODALS (for future staff apply) =================
+      // ================= MODALS (FUTURE STAFF FORM SUPPORT) =================
       if (interaction.isModalSubmit()) {
 
-        // Example for staff application modal
         if (interaction.customId === "staff_apply_form") {
 
-          const answer1 = interaction.fields.getTextInputValue("q1");
-          const answer2 = interaction.fields.getTextInputValue("q2");
+          const q1 = interaction.fields.getTextInputValue("q1");
+          const q2 = interaction.fields.getTextInputValue("q2");
+          const q3 = interaction.fields.getTextInputValue("q3");
+          const q4 = interaction.fields.getTextInputValue("q4");
+
+          const logChannel = interaction.guild.channels.cache.find(
+            c => c.name === "staff-applications"
+          );
+
+          if (logChannel) {
+            logChannel.send(`
+🧑‍💼 **NEW STAFF APPLICATION**
+
+👤 User: ${interaction.user.tag}
+
+1️⃣ ${q1}
+2️⃣ ${q2}
+3️⃣ ${q3}
+4️⃣ ${q4}
+            `);
+          }
 
           return interaction.reply({
             content: "✅ Application submitted successfully!",
