@@ -35,7 +35,6 @@ require("./systems/invites")(client);
 // ================= READY EVENT =================
 client.once("clientReady", () => {
   console.log("Bot is ready");
-});
 
   console.log(`
 ✅ BOT ONLINE
