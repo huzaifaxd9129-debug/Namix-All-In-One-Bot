@@ -1,1 +1,17 @@
-
+{
+  "name": "pro-discord-bot",
+  "version": "1.0.0",
+  "description": "Professional Discord bot with moderation, tickets, giveaways, automod, invites, and more",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "author": "Huztro",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.16.0",
+    "dotenv": "^16.4.5",
+    "fs": "^0.0.1-security"
+  }
+}
